@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stockify</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="stars2"></div>
+    
+    <nav class="glass-nav">
+        <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            <span>Stockify</span>
+        </div>
+        <ul>
+            <li><a href="#" class="active">Home</a></li>
+            <li><a href="popular.html">Popular Stocks</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="ticker_name.csv" download="ticker_name.csv">Download Tickers</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <section class="hero glass-card">
+            <h1 class="hero-title">Smart Stock Predictor</h1>
+            <p class="hero-subtitle">Invest with <span class="text-gradient">Confidence</span></p>
+            <p class="hero-description">
+                Our AI-powered stock prediction system analyzes historical data to forecast future prices. 
+                Select a stock ticker and see what the future holds for your investments.
+            </p>
+        </section>
+
+        <section class="prediction-section glass-card">
+            <h2><i class="fas fa-magic"></i> Make Prediction</h2>
+            <form id="predictionForm">
+                <div class="form-group">
+                    <label for="ticker"><i class="fas fa-tag"></i> Stock Ticker</label>
+                    <input type="text" id="ticker" placeholder="e.g. AAPL" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="model"><i class="fas fa-brain"></i> Prediction Model</label>
+                    <select id="model">
+                        <option value="Linear Regression">Linear Regression</option>
+                        <option value="Random Forest">Random Forest</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="days"><i class="fas fa-calendar-alt"></i> Prediction Days</label>
+                    <input type="number" id="days" min="1" max="30" value="5" required>
+                </div>
+                
+                <button type="submit" class="glow-button">
+                    <span>Predict Now</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+        </section>
+
+        <section id="resultsSection" class="results-section glass-card hidden">
+            <div class="results-header">
+                <h2><i class="fas fa-chart-bar"></i> Prediction Results</h2>
+                <span id="currentPrice" class="price-badge">$0.00</span>
+            </div>
+            
+            <div class="results-grid">
+                <div class="predictions-card">
+                    <h3><i class="fas fa-arrow-trend-up"></i> Future Predictions</h3>
+                    <div id="predictionsList" class="predictions-list"></div>
+                </div>
+                
+                <div class="metrics-card">
+                    <h3><i class="fas fa-gauge-high"></i> Model Metrics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <span class="metric-label">Model Used</span>
+                            <span id="modelUsed" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">R² Score</span>
+                            <span id="r2Score" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">MSE</span>
+                            <span id="mseValue" class="metric-value">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+    <h3>Historical vs Predicted Prices</h3>
+    <img id="predictionChart1" src="" alt="Historical vs Predicted Prices Chart">
+    <button id="downloadChart1" class="download-button">
+        <i class="fas fa-download"></i> Download Chart
+    </button>
+</div>
+
+<div class="chart-container">
+    <h3>Predicted Prices</h3>
+    <img id="predictionChart2" src="" alt="Predicted Prices Chart">
+    <button id="downloadChart2" class="download-button">
+        <i class="fas fa-download"></i> Download Chart
+    </button>
+</div>
+        </section>
+    </main>
+
+    <footer class="glass-footer">
+        <p>© 2025 Smart Stock Predictor | Powered by AI</p>
+    </footer>
+
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

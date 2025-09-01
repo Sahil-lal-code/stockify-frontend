@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | Smart Stock Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="stars2"></div>
+    
+    <nav class="glass-nav">
+        <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            <span>SmartStocks</span>
+        </div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="popular.html">Popular Stocks</a></li>
+            <li><a href="#" class="active">About</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <section class="hero glass-card">
+            <h1 class="hero-title">ABOUT THE DEVELOPER</h1>
+            <p class="hero-subtitle">Behind the <span class="text-gradient">Code</span></p>
+        </section>
+
+        <section class="about-section">
+            <div class="developer-card glass-card">
+                <div class="developer-image">
+                    <img src="assets/developer-photo.jpeg" alt="Developer Photo">
+                </div>
+                <div class="developer-info">
+                    <h2>Sahil Lal</h2>
+                    <p class="developer-title">AI & Full Stack Developer</p>
+                    <p class="developer-bio">
+                        Passionate about building intelligent systems that solve real-world problems. 
+                        This stock prediction project combines my interests in finance and machine learning.
+                    </p>
+                    
+                    <div class="developer-skills">
+                        <h3>Skills</h3>
+                        <div class="skills-tags">
+                            <span>Python</span>
+                            <span>PANDAS</span>
+                            <span>Machine Learning</span>
+                            <span>MATPLOTLIB</span>
+                            <span>Flask</span>
+                            <span>JavaScript</span>
+                            <span>HTML/CSS</span>
+                        </div>
+                    </div>
+                    
+                    <div class="developer-links">
+                        <a href="https://github.com/Sahil-lal-code" target="_blank" class="social-link">
+                            <i class="fab fa-github"></i> GitHub
+                        </a>
+                        <a href="https://www.linkedin.com/in/sahil-lal-4152a92a0/" target="_blank" class="social-link">
+                            <i class="fab fa-linkedin"></i> LinkedIn
+                        </a>
+                        <a href="mailto:sahillal615@gmail.com" class="social-link">
+                            <i class="fas fa-envelope"></i> Email
+                        </a>
+                    </div>
+                    
+                    <a href="your-resume.pdf" download class="hire-button">
+                        <i class="fas fa-file-download"></i> Download Resume
+                    </a>
+                </div>
+            </div>
+            
+            <div class="project-info glass-card">
+                <h2>About This Project</h2>
+<p>
+    The Smart Stock Predictor leverages machine learning to analyze historical stock data and forecast future price movements. 
+    Our system combines technical indicators with advanced algorithms to generate predictions with measurable accuracy.
+</p>
+
+<h3>Machine Learning Core</h3>
+<p>
+    <strong>Linear Regression:</strong> Our baseline model that establishes relationships between historical price features and future values. 
+    While simple, it provides a robust foundation for identifying linear trends in market data.
+</p>
+
+<p>
+    <strong>Random Forest:</strong> An ensemble method that combines multiple decision trees to capture non-linear patterns and 
+    complex interactions in market behavior. This model excels at handling volatility and short-term fluctuations.
+</p>
+
+<h3>Model Evaluation</h3>
+<p>
+    <strong>R² (R-Squared):</strong> Measures how well our models explain price variability (0-100%). 
+    </p><p>
+    For Example --> R² of 0.42 indicates the model captures 42% of price movements - a strong result given market randomness.
+</p>
+
+<p>
+    <strong>MSE (Mean Squared Error):</strong> Quantifies prediction accuracy in dollar terms. </p>
+    <p>For Example --> MSE of 0.112 means predictions are typically within $0.11 of actual prices - competitive for daily forecasting.
+</p>
+
+<div class="tech-note">
+    <i class="fas fa-flask"></i>
+    <strong>Technical Note:</strong> All models are regularly retrained using walk-forward validation to adapt to market changes.
+</div>
+
+<p class="disclaimer">
+    <i class="fas fa-exclamation-triangle"></i>
+    <strong>Disclaimer:</strong> Predictions are for educational purposes only. 
+    Past performance doesn't guarantee future results. Always consult a financial advisor.
+</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="glass-footer">
+        <p>© 2023 Smart Stock Predictor | Powered by AI</p>
+    </footer>
+</body>
+</html>
