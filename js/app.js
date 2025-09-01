@@ -13,10 +13,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Timeout utility function
+function fetchWithTimeout(url, options, timeout = 90000) {
+    return Promise.race([
+        fetch(url, options),
+        new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout - backend is waking up. Please try again in 30 seconds.')), timeout)
+        )
+    ]);
+}
+
 function initPredictionPage(API_BASE_URL) {
     const predictionForm = document.getElementById('predictionForm');
     const resultsSection = document.getElementById('resultsSection');
     const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingMessage = document.getElementById('loadingMessage');
     
     // Auto-format ticker to uppercase
     const tickerInput = document.getElementById('ticker');
@@ -45,22 +56,24 @@ function initPredictionPage(API_BASE_URL) {
         try {
             loadingOverlay.classList.remove('hidden');
             resultsSection.classList.add('hidden');
+            if (loadingMessage) {
+                loadingMessage.textContent = 'Processing your prediction...';
+            }
             
             console.log('Making prediction request to:', `${API_BASE_URL}/predict`);
             console.log('Request data:', { ticker, model, days });
             
-            const response = await fetch(`${API_BASE_URL}/predict`, {
+            const response = await fetchWithTimeout(`${API_BASE_URL}/predict`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                mode: 'cors',
                 body: JSON.stringify({
                     ticker: ticker,
                     model: model,
                     days: days
                 })
-            });
+            }, 90000); // 90 second timeout for cold starts
             
             console.log('Response status:', response.status, response.statusText);
             
@@ -87,7 +100,11 @@ function initPredictionPage(API_BASE_URL) {
             
         } catch (error) {
             console.error('Prediction error:', error);
-            showError(error.message || 'Failed to connect to prediction service. Please try again later.');
+            if (error.message.includes('timeout')) {
+                showError('Backend is waking up. This can take up to 60 seconds on first request. Please try again in 30 seconds.');
+            } else {
+                showError(error.message || 'Failed to connect to prediction service. Please try again later.');
+            }
         } finally {
             loadingOverlay.classList.add('hidden');
         }
@@ -140,9 +157,9 @@ function initPopularStocksPage(API_BASE_URL) {
         try {
             console.log('Fetching popular stocks from:', `${API_BASE_URL}/popular`);
             
-            const response = await fetch(`${API_BASE_URL}/popular`, {
+            const response = await fetchWithTimeout(`${API_BASE_URL}/popular`, {
                 mode: 'cors'
-            });
+            }, 30000); // 30 second timeout
             
             console.log('Popular stocks response status:', response.status, response.statusText);
             
@@ -295,3 +312,31 @@ function showError(message) {
         errorAlert.remove();
     }, 5000);
 }
+
+// Debug function to test with AAPL
+window.testWithAAPL = async function() {
+    try {
+        console.log('Testing with AAPL...');
+        const API_BASE_URL = window.env?.API_URL || 'https://stockify-backend-t7r2.onrender.com';
+        
+        const response = await fetch(`${API_BASE_URL}/predict`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ticker: 'AAPL',
+                model: 'Linear Regression',
+                days: 5
+            })
+        });
+        
+        console.log('AAPL test status:', response.status);
+        const data = await response.json();
+        console.log('AAPL test response:', data);
+        return data;
+    } catch (error) {
+        console.error('AAPL test error:', error);
+        throw error;
+    }
+};

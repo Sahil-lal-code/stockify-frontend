@@ -126,6 +126,12 @@
   window.env = {
     API_URL: '%ENV:API_URL%'
   };
+  <!-- Update your loading overlay in index.html -->
+<div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-spinner"></div>
+    <p id="loadingMessage">Processing your prediction...</p>
+    <p class="loading-subtext">This may take up to 60 seconds on first request</p>
+</div>
 </script>
 </body>
 </html>

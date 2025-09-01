@@ -33,7 +33,12 @@ h1, h2, h3, h4 {
     margin: 0 auto;
     padding: 20px;
 }
-
+.loading-subtext {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-top: 10px;
+    text-align: center;
+}
 /* Background Animation */
 .stars, .stars2 {
     position: fixed;
