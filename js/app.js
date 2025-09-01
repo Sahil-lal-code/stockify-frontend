@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Use environment variable or fallback to Render URL
     const API_BASE_URL = window.env?.API_URL || 'https://stockify-backend-t7r2.onrender.com';
+    console.log('API Base URL:', API_BASE_URL);
     
     if (currentPage === 'index.html' || currentPage === '') {
         initPredictionPage(API_BASE_URL);
@@ -45,11 +46,15 @@ function initPredictionPage(API_BASE_URL) {
             loadingOverlay.classList.remove('hidden');
             resultsSection.classList.add('hidden');
             
+            console.log('Making prediction request to:', `${API_BASE_URL}/predict`);
+            console.log('Request data:', { ticker, model, days });
+            
             const response = await fetch(`${API_BASE_URL}/predict`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                mode: 'cors',
                 body: JSON.stringify({
                     ticker: ticker,
                     model: model,
@@ -57,13 +62,22 @@ function initPredictionPage(API_BASE_URL) {
                 })
             });
             
+            console.log('Response status:', response.status, response.statusText);
+            
             // Handle HTTP errors
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `Server error: ${response.status}`);
+                let errorMessage = `Server error: ${response.status} ${response.statusText}`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                } catch (e) {
+                    // Could not parse JSON error response
+                }
+                throw new Error(errorMessage);
             }
             
             const data = await response.json();
+            console.log('Response data:', data);
             
             if (data.status === 'error') {
                 throw new Error(data.error || 'Failed to get predictions');
@@ -124,14 +138,21 @@ function initPopularStocksPage(API_BASE_URL) {
     
     async function fetchPopularStocks(API_BASE_URL) {
         try {
-            const response = await fetch(`${API_BASE_URL}/popular`);
+            console.log('Fetching popular stocks from:', `${API_BASE_URL}/popular`);
+            
+            const response = await fetch(`${API_BASE_URL}/popular`, {
+                mode: 'cors'
+            });
+            
+            console.log('Popular stocks response status:', response.status, response.statusText);
             
             // Handle HTTP errors
             if (!response.ok) {
-                throw new Error(`Server error: ${response.status}`);
+                throw new Error(`Server error: ${response.status} ${response.statusText}`);
             }
             
             const stocks = await response.json();
+            console.log('Popular stocks data:', stocks);
             
             if (!stocks || !Array.isArray(stocks)) {
                 throw new Error('Invalid data format received from server');
