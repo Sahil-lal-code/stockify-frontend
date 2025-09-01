@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check which page we're on
     const currentPage = window.location.pathname.split('/').pop();
     
-    // Use environment variable or fallback to Render URL
-    const API_BASE_URL = window.env?.API_URL || 'https://stockify-backend-t7r2.onrender.com';
+    // Use your Render backend URL
+    const API_BASE_URL = 'https://stockify-backend-t7r2.onrender.com';
     console.log('API Base URL:', API_BASE_URL);
     
     if (currentPage === 'index.html' || currentPage === '') {
@@ -27,7 +27,6 @@ function initPredictionPage(API_BASE_URL) {
     const predictionForm = document.getElementById('predictionForm');
     const resultsSection = document.getElementById('resultsSection');
     const loadingOverlay = document.getElementById('loadingOverlay');
-    const loadingMessage = document.getElementById('loadingMessage');
     
     // Auto-format ticker to uppercase
     const tickerInput = document.getElementById('ticker');
@@ -56,12 +55,8 @@ function initPredictionPage(API_BASE_URL) {
         try {
             loadingOverlay.classList.remove('hidden');
             resultsSection.classList.add('hidden');
-            if (loadingMessage) {
-                loadingMessage.textContent = 'Processing your prediction...';
-            }
             
             console.log('Making prediction request to:', `${API_BASE_URL}/predict`);
-            console.log('Request data:', { ticker, model, days });
             
             const response = await fetchWithTimeout(`${API_BASE_URL}/predict`, {
                 method: 'POST',
@@ -73,13 +68,12 @@ function initPredictionPage(API_BASE_URL) {
                     model: model,
                     days: days
                 })
-            }, 90000); // 90 second timeout for cold starts
+            }, 60000); // 60 second timeout
             
             console.log('Response status:', response.status, response.statusText);
             
-            // Handle HTTP errors
             if (!response.ok) {
-                let errorMessage = `Server error: ${response.status} ${response.statusText}`;
+                let errorMessage = `Server error: ${response.status}`;
                 try {
                     const errorData = await response.json();
                     errorMessage = errorData.error || errorMessage;
@@ -157,13 +151,10 @@ function initPopularStocksPage(API_BASE_URL) {
         try {
             console.log('Fetching popular stocks from:', `${API_BASE_URL}/popular`);
             
-            const response = await fetchWithTimeout(`${API_BASE_URL}/popular`, {
-                mode: 'cors'
-            }, 30000); // 30 second timeout
+            const response = await fetchWithTimeout(`${API_BASE_URL}/popular`, {}, 30000);
             
             console.log('Popular stocks response status:', response.status, response.statusText);
             
-            // Handle HTTP errors
             if (!response.ok) {
                 throw new Error(`Server error: ${response.status} ${response.statusText}`);
             }
@@ -223,40 +214,49 @@ function displayResults(data) {
     try {
         // 1. Update current price
         const currentPriceElement = document.getElementById('currentPrice');
-        currentPriceElement.textContent = `$${data.current_price?.toFixed(2) || 'N/A'}`;
+        if (currentPriceElement) {
+            currentPriceElement.textContent = `$${data.current_price?.toFixed(2) || 'N/A'}`;
+        }
 
         // 2. Update predictions list
         const predictionsList = document.getElementById('predictionsList');
-        const predictionsCard = predictionsList.closest('.predictions-card');
-        predictionsList.innerHTML = '';
-        
-        if (data.predictions && data.predictions.length > 0) {
-            data.predictions.forEach((pred, index) => {
-                const predictionItem = document.createElement('div');
-                predictionItem.className = 'prediction-item';
-                predictionItem.innerHTML = `
-                    <span class="prediction-day">Day ${index + 1}</span>
-                    <span class="prediction-value">$${pred?.toFixed(2) || 'N/A'}</span>
-                `;
-                predictionsList.appendChild(predictionItem);
-            });
+        if (predictionsList) {
+            const predictionsCard = predictionsList.closest('.predictions-card');
+            predictionsList.innerHTML = '';
+            
+            if (data.predictions && data.predictions.length > 0) {
+                data.predictions.forEach((pred, index) => {
+                    const predictionItem = document.createElement('div');
+                    predictionItem.className = 'prediction-item';
+                    predictionItem.innerHTML = `
+                        <span class="prediction-day">Day ${index + 1}</span>
+                        <span class="prediction-value">$${pred?.toFixed(2) || 'N/A'}</span>
+                    `;
+                    predictionsList.appendChild(predictionItem);
+                });
 
-            // Add scrollable class if more than 5 predictions
-            if (data.predictions.length > 5) {
-                predictionsCard.classList.add('scrollable');
+                if (data.predictions.length > 5) {
+                    predictionsCard.classList.add('scrollable');
+                } else {
+                    predictionsCard.classList.remove('scrollable');
+                }
             } else {
+                predictionsList.innerHTML = '<div class="no-predictions">No predictions available</div>';
                 predictionsCard.classList.remove('scrollable');
             }
-        } else {
-            predictionsList.innerHTML = '<div class="no-predictions">No predictions available</div>';
-            predictionsCard.classList.remove('scrollable');
         }
 
         // 3. Update model metrics
         const metrics = data.model_metrics || {};
-        document.getElementById('modelUsed').textContent = metrics.model || 'N/A';
-        document.getElementById('r2Score').textContent = metrics.r2_score?.toFixed(4) || 'N/A';
-        document.getElementById('mseValue').textContent = metrics.mse?.toFixed(4) || 'N/A';
+        if (document.getElementById('modelUsed')) {
+            document.getElementById('modelUsed').textContent = metrics.model || 'N/A';
+        }
+        if (document.getElementById('r2Score')) {
+            document.getElementById('r2Score').textContent = metrics.r2_score?.toFixed(4) || 'N/A';
+        }
+        if (document.getElementById('mseValue')) {
+            document.getElementById('mseValue').textContent = metrics.mse?.toFixed(4) || 'N/A';
+        }
         
         // 4. Update charts
         const chartImg1 = document.getElementById('predictionChart1');
@@ -264,33 +264,33 @@ function displayResults(data) {
         const downloadBtn1 = document.getElementById('downloadChart1');
         const downloadBtn2 = document.getElementById('downloadChart2');
         
-        if (data.plot1) {
+        if (data.plot1 && chartImg1) {
             chartImg1.src = `data:image/png;base64,${data.plot1}`;
             chartImg1.style.display = 'block';
-            downloadBtn1.style.display = 'inline-block';
-        } else {
+            if (downloadBtn1) downloadBtn1.style.display = 'inline-block';
+        } else if (chartImg1) {
             chartImg1.style.display = 'none';
-            downloadBtn1.style.display = 'none';
-            console.warn('No chart data received for plot1');
+            if (downloadBtn1) downloadBtn1.style.display = 'none';
         }
 
-        if (data.plot2) {
+        if (data.plot2 && chartImg2) {
             chartImg2.src = `data:image/png;base64,${data.plot2}`;
             chartImg2.style.display = 'block';
-            downloadBtn2.style.display = 'inline-block';
-        } else {
+            if (downloadBtn2) downloadBtn2.style.display = 'inline-block';
+        } else if (chartImg2) {
             chartImg2.style.display = 'none';
-            downloadBtn2.style.display = 'none';
-            console.warn('No chart data received for plot2');
+            if (downloadBtn2) downloadBtn2.style.display = 'none';
         }
 
         // Show results section
-        document.getElementById('resultsSection').classList.remove('hidden');
-        
-        // Scroll to results
-        setTimeout(() => {
-            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-        }, 300);
+        if (resultsSection) {
+            document.getElementById('resultsSection').classList.remove('hidden');
+            
+            // Scroll to results
+            setTimeout(() => {
+                document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+        }
         
     } catch (error) {
         console.error('Error displaying results:', error);
@@ -299,6 +299,9 @@ function displayResults(data) {
 }
 
 function showError(message) {
+    // Remove any existing error alerts
+    document.querySelectorAll('.error-alert').forEach(el => el.remove());
+    
     const errorAlert = document.createElement('div');
     errorAlert.className = 'error-alert glass-card';
     errorAlert.innerHTML = `
@@ -314,29 +317,18 @@ function showError(message) {
 }
 
 // Debug function to test with AAPL
-window.testWithAAPL = async function() {
+window.testConnection = async function() {
     try {
-        console.log('Testing with AAPL...');
-        const API_BASE_URL = window.env?.API_URL || 'https://stockify-backend-t7r2.onrender.com';
+        const API_BASE_URL = 'https://stockify-backend-t7r2.onrender.com';
+        console.log('Testing connection to:', API_BASE_URL);
         
-        const response = await fetch(`${API_BASE_URL}/predict`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ticker: 'AAPL',
-                model: 'Linear Regression',
-                days: 5
-            })
-        });
-        
-        console.log('AAPL test status:', response.status);
+        const response = await fetch(`${API_BASE_URL}/health`);
         const data = await response.json();
-        console.log('AAPL test response:', data);
+        console.log('Health check:', data);
+        
         return data;
     } catch (error) {
-        console.error('AAPL test error:', error);
+        console.error('Connection test error:', error);
         throw error;
     }
 };
