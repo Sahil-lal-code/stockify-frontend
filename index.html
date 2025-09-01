@@ -121,5 +121,11 @@
     </div>
 
     <script src="js/app.js"></script>
+    <script>
+  // Read Netlify environment variables
+  window.env = {
+    API_URL: '%ENV:API_URL%'
+  };
+</script>
 </body>
 </html>
