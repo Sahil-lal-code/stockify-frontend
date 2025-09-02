@@ -78,7 +78,14 @@ function initPredictionPage(API_BASE_URL) {
                     const errorData = await response.json();
                     errorMessage = errorData.error || errorMessage;
                 } catch (e) {
-                    // Could not parse JSON error response
+                    // If JSON parsing fails, try to get text response
+                    try {
+                        const errorText = await response.text();
+                        if (errorText) errorMessage = errorText;
+                    } catch (textError) {
+                        // If text parsing also fails, use default message
+                        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+                    }
                 }
                 throw new Error(errorMessage);
             }
@@ -156,7 +163,21 @@ function initPopularStocksPage(API_BASE_URL) {
             console.log('Popular stocks response status:', response.status, response.statusText);
             
             if (!response.ok) {
-                throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                let errorMessage = `Server error: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                } catch (e) {
+                    // If JSON parsing fails, try to get text response
+                    try {
+                        const errorText = await response.text();
+                        if (errorText) errorMessage = errorText;
+                    } catch (textError) {
+                        // If text parsing also fails, use default message
+                        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+                    }
+                }
+                throw new Error(errorMessage);
             }
             
             const stocks = await response.json();
