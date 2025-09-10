@@ -1,120 +1,162 @@
+// Set API URL for production
+const API_BASE_URL = 'https://stockify-backend-9gfp.onrender.com';
+
+// Initialize mobile menu functionality
+function initMobileMenu() {
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+    const navMenu = document.querySelector('.nav-menu');
+    
+    if (mobileMenuToggle && navMenu) {
+        // Make sure the toggle button is visible on mobile
+        mobileMenuToggle.style.display = 'block';
+        
+        mobileMenuToggle.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+            const icon = this.querySelector('i');
+            if (navMenu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+        
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                if (mobileMenuToggle) {
+                    const icon = mobileMenuToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const isClickInsideNav = navMenu.contains(event.target);
+            const isClickOnToggle = mobileMenuToggle.contains(event.target);
+            
+            if (!isClickInsideNav && !isClickOnToggle && navMenu.classList.contains('active')) {
+                navMenu.classList.remove('active');
+                const icon = mobileMenuToggle.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+    } else {
+        console.warn('Mobile menu elements not found');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize mobile menu on all pages
+    initMobileMenu();
+
     // Check which page we're on
     const currentPage = window.location.pathname.split('/').pop();
     
-    // Use your Render backend URL
-    const API_BASE_URL = 'https://stockify-backend-t7r2.onrender.com';
-    console.log('API Base URL:', API_BASE_URL);
-    
-    if (currentPage === 'index.html' || currentPage === '') {
-        initPredictionPage(API_BASE_URL);
+    if (currentPage === 'index.html' || currentPage === '' || currentPage === '/') {
+        initPredictionPage();
     } else if (currentPage === 'popular.html') {
-        initPopularStocksPage(API_BASE_URL);
+        initPopularStocksPage();
     }
+    
+    // Add responsive check on window resize
+    window.addEventListener('resize', function() {
+        const navMenu = document.querySelector('.nav-menu');
+        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+        
+        if (window.innerWidth > 768 && navMenu) {
+            navMenu.classList.remove('active');
+            if (mobileMenuToggle) {
+                const icon = mobileMenuToggle.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        }
+    });
 });
 
-// Timeout utility function
-function fetchWithTimeout(url, options, timeout = 90000) {
-    return Promise.race([
-        fetch(url, options),
-        new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Request timeout - backend is waking up. Please try again in 30 seconds.')), timeout)
-        )
-    ]);
-}
-
-function initPredictionPage(API_BASE_URL) {
+function initPredictionPage() {
     const predictionForm = document.getElementById('predictionForm');
     const resultsSection = document.getElementById('resultsSection');
     const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingMessage = document.getElementById('loadingMessage');
     
     // Auto-format ticker to uppercase
     const tickerInput = document.getElementById('ticker');
-    tickerInput.addEventListener('input', function() {
-        this.value = this.value.toUpperCase();
-    });
+    if (tickerInput) {
+        tickerInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+    }
     
     // Form submission
-    predictionForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const ticker = tickerInput.value.trim();
-        const model = document.getElementById('model').value;
-        const days = parseInt(document.getElementById('days').value);
-        
-        if (!ticker) {
-            showError('Please enter a stock ticker symbol');
-            return;
-        }
-        
-        if (days < 1 || days > 30) {
-            showError('Prediction days must be between 1 and 30');
-            return;
-        }
-        
-        try {
-            loadingOverlay.classList.remove('hidden');
-            resultsSection.classList.add('hidden');
+    if (predictionForm) {
+        predictionForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            console.log('Making prediction request to:', `${API_BASE_URL}/predict`);
+            const ticker = tickerInput.value.trim();
+            const model = document.getElementById('model').value;
+            const days = parseInt(document.getElementById('days').value);
             
-            const response = await fetchWithTimeout(`${API_BASE_URL}/predict`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ticker: ticker,
-                    model: model,
-                    days: days
-                })
-            }, 60000); // 60 second timeout
+            if (!ticker) {
+                showError('Please enter a stock ticker symbol');
+                return;
+            }
             
-            console.log('Response status:', response.status, response.statusText);
+            if (days < 1 || days > 30) {
+                showError('Prediction days must be between 1 and 30');
+                return;
+            }
             
-            if (!response.ok) {
-                let errorMessage = `Server error: ${response.status}`;
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.error || errorMessage;
-                } catch (e) {
-                    // If JSON parsing fails, try to get text response
-                    try {
-                        const errorText = await response.text();
-                        if (errorText) errorMessage = errorText;
-                    } catch (textError) {
-                        // If text parsing also fails, use default message
-                        errorMessage = `Server error: ${response.status} ${response.statusText}`;
-                    }
+            try {
+                loadingOverlay.classList.remove('hidden');
+                loadingMessage.textContent = 'Processing your prediction...';
+                resultsSection.classList.add('hidden');
+                
+                const response = await fetch(`${API_BASE_URL}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ticker: ticker,
+                        model: model,
+                        days: days
+                    })
+                });
+                
+                // Check if response is OK before parsing JSON
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
                 }
-                throw new Error(errorMessage);
+                
+                const data = await response.json();
+                
+                if (data.status === 'error') {
+                    throw new Error(data.error || 'Failed to get predictions');
+                }
+                
+                displayResults(data);
+                
+            } catch (error) {
+                console.error('Prediction error:', error);
+                showError(error.message || 'Something went wrong. Please try again.');
+            } finally {
+                loadingOverlay.classList.add('hidden');
             }
-            
-            const data = await response.json();
-            console.log('Response data:', data);
-            
-            if (data.status === 'error') {
-                throw new Error(data.error || 'Failed to get predictions');
-            }
-            
-            displayResults(data);
-            
-        } catch (error) {
-            console.error('Prediction error:', error);
-            if (error.message.includes('timeout')) {
-                showError('Backend is waking up. This can take up to 60 seconds on first request. Please try again in 30 seconds.');
-            } else {
-                showError(error.message || 'Failed to connect to prediction service. Please try again later.');
-            }
-        } finally {
-            loadingOverlay.classList.add('hidden');
-        }
-    });
+        });
+    }
 
     // Download chart buttons
     document.getElementById('downloadChart1')?.addEventListener('click', function() {
         const chartImg1 = document.getElementById('predictionChart1');
-        if (!chartImg1.src) return;
+        if (!chartImg1 || !chartImg1.src) return;
         
         const link1 = document.createElement('a');
         link1.href = chartImg1.src;
@@ -126,7 +168,7 @@ function initPredictionPage(API_BASE_URL) {
 
     document.getElementById('downloadChart2')?.addEventListener('click', function() {
         const chartImg2 = document.getElementById('predictionChart2');
-        if (!chartImg2.src) return;
+        if (!chartImg2 || !chartImg2.src) return;
         
         const link2 = document.createElement('a');
         link2.href = chartImg2.src;
@@ -148,43 +190,26 @@ function initPredictionPage(API_BASE_URL) {
     getUrlParams();
 }
 
-function initPopularStocksPage(API_BASE_URL) {
+function initPopularStocksPage() {
     const stocksGrid = document.getElementById('popularStocks');
     
     // Fetch popular stocks
-    fetchPopularStocks(API_BASE_URL);
+    if (stocksGrid) {
+        fetchPopularStocks();
+    }
     
-    async function fetchPopularStocks(API_BASE_URL) {
+    async function fetchPopularStocks() {
         try {
-            console.log('Fetching popular stocks from:', `${API_BASE_URL}/popular`);
-            
-            const response = await fetchWithTimeout(`${API_BASE_URL}/popular`, {}, 30000);
-            
-            console.log('Popular stocks response status:', response.status, response.statusText);
+            const response = await fetch(`${API_BASE_URL}/popular`);
             
             if (!response.ok) {
-                let errorMessage = `Server error: ${response.status}`;
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.error || errorMessage;
-                } catch (e) {
-                    // If JSON parsing fails, try to get text response
-                    try {
-                        const errorText = await response.text();
-                        if (errorText) errorMessage = errorText;
-                    } catch (textError) {
-                        // If text parsing also fails, use default message
-                        errorMessage = `Server error: ${response.status} ${response.statusText}`;
-                    }
-                }
-                throw new Error(errorMessage);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const stocks = await response.json();
-            console.log('Popular stocks data:', stocks);
             
             if (!stocks || !Array.isArray(stocks)) {
-                throw new Error('Invalid data format received from server');
+                throw new Error('Invalid data format received');
             }
             
             renderPopularStocks(stocks);
@@ -193,24 +218,25 @@ function initPopularStocksPage(API_BASE_URL) {
             stocksGrid.innerHTML = `
                 <div class="error-message glass-card">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <p>${error.message || 'Failed to load popular stocks. Please try again later.'}</p>
+                    <p>Failed to load popular stocks. Please try again later.</p>
+                    <p>Error: ${error.message}</p>
                 </div>
             `;
         }
     }
     
     function renderPopularStocks(stocks) {
-        stocksGrid.innerHTML = '';
-        
-        if (stocks.length === 0) {
+        if (!stocks || stocks.length === 0) {
             stocksGrid.innerHTML = `
                 <div class="error-message glass-card">
-                    <i class="fas fa-info-circle"></i>
+                    <i class="fas fa-exclamation-triangle"></i>
                     <p>No popular stocks available at the moment.</p>
                 </div>
             `;
             return;
         }
+        
+        stocksGrid.innerHTML = '';
         
         stocks.forEach(stock => {
             const stockCard = document.createElement('div');
@@ -241,8 +267,9 @@ function displayResults(data) {
 
         // 2. Update predictions list
         const predictionsList = document.getElementById('predictionsList');
+        const predictionsCard = predictionsList?.closest('.predictions-card');
+        
         if (predictionsList) {
-            const predictionsCard = predictionsList.closest('.predictions-card');
             predictionsList.innerHTML = '';
             
             if (data.predictions && data.predictions.length > 0) {
@@ -256,14 +283,17 @@ function displayResults(data) {
                     predictionsList.appendChild(predictionItem);
                 });
 
-                if (data.predictions.length > 5) {
+                // Add scrollable class if more than 5 predictions
+                if (predictionsCard && data.predictions.length > 5) {
                     predictionsCard.classList.add('scrollable');
-                } else {
+                } else if (predictionsCard) {
                     predictionsCard.classList.remove('scrollable');
                 }
             } else {
                 predictionsList.innerHTML = '<div class="no-predictions">No predictions available</div>';
-                predictionsCard.classList.remove('scrollable');
+                if (predictionsCard) {
+                    predictionsCard.classList.remove('scrollable');
+                }
             }
         }
 
@@ -285,31 +315,34 @@ function displayResults(data) {
         const downloadBtn1 = document.getElementById('downloadChart1');
         const downloadBtn2 = document.getElementById('downloadChart2');
         
-        if (data.plot1 && chartImg1) {
+        if (chartImg1 && data.plot1) {
             chartImg1.src = `data:image/png;base64,${data.plot1}`;
             chartImg1.style.display = 'block';
             if (downloadBtn1) downloadBtn1.style.display = 'inline-block';
         } else if (chartImg1) {
             chartImg1.style.display = 'none';
             if (downloadBtn1) downloadBtn1.style.display = 'none';
+            console.warn('No chart data received for plot1');
         }
 
-        if (data.plot2 && chartImg2) {
+        if (chartImg2 && data.plot2) {
             chartImg2.src = `data:image/png;base64,${data.plot2}`;
             chartImg2.style.display = 'block';
             if (downloadBtn2) downloadBtn2.style.display = 'inline-block';
         } else if (chartImg2) {
             chartImg2.style.display = 'none';
             if (downloadBtn2) downloadBtn2.style.display = 'none';
+            console.warn('No chart data received for plot2');
         }
 
         // Show results section
+        const resultsSection = document.getElementById('resultsSection');
         if (resultsSection) {
-            document.getElementById('resultsSection').classList.remove('hidden');
+            resultsSection.classList.remove('hidden');
             
             // Scroll to results
             setTimeout(() => {
-                document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 300);
         }
         
@@ -321,7 +354,7 @@ function displayResults(data) {
 
 function showError(message) {
     // Remove any existing error alerts
-    document.querySelectorAll('.error-alert').forEach(el => el.remove());
+    document.querySelectorAll('.error-alert').forEach(alert => alert.remove());
     
     const errorAlert = document.createElement('div');
     errorAlert.className = 'error-alert glass-card';
@@ -336,20 +369,3 @@ function showError(message) {
         errorAlert.remove();
     }, 5000);
 }
-
-// Debug function to test with AAPL
-window.testConnection = async function() {
-    try {
-        const API_BASE_URL = 'https://stockify-backend-t7r2.onrender.com';
-        console.log('Testing connection to:', API_BASE_URL);
-        
-        const response = await fetch(`${API_BASE_URL}/health`);
-        const data = await response.json();
-        console.log('Health check:', data);
-        
-        return data;
-    } catch (error) {
-        console.error('Connection test error:', error);
-        throw error;
-    }
-};

@@ -15,12 +15,16 @@
     <nav class="glass-nav">
         <div class="logo">
             <i class="fas fa-chart-line"></i>
-            <span>SmartStocks</span>
+            <span>Stockify</span>
         </div>
-        <ul>
+        <button class="mobile-menu-toggle" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <ul class="nav-menu">
             <li><a href="index.html">Home</a></li>
             <li><a href="#" class="active">Popular Stocks</a></li>
             <li><a href="about.html">About</a></li>
+            <li><a href="ticker_name.csv" download="ticker_name.csv">Download Tickers</a></li>
         </ul>
     </nav>
 
@@ -44,9 +48,13 @@
     </main>
 
     <footer class="glass-footer">
-        <p>© 2023 Smart Stock Predictor | Powered by AI</p>
+        <p>© 2025 Smart Stock Predictor | Powered by AI</p>
     </footer>
 
     <script src="js/app.js"></script>
+    <script>
+        // Set API URL for production
+        const API_BASE_URL = 'https://stockify-backend-9gfp.onrender.com';
+    </script>
 </body>
 </html>

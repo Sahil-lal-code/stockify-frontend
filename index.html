@@ -7,6 +7,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Ensure hamburger button is visible on mobile */
+        .mobile-menu-toggle {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block !important;
+                z-index: 1001;
+                font-size: 1.8rem;
+                color: #00f2ff;
+                background: rgba(0, 0, 0, 0.2);
+                border: 1px solid rgba(0, 242, 255, 0.3);
+                border-radius: 4px;
+                padding: 5px 10px;
+                cursor: pointer;
+            }
+        }
+        
+        /* Temporary visibility for testing */
+        .mobile-menu-toggle.test-visible {
+            display: block !important;
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            background: #00f2ff;
+            color: #050505;
+            z-index: 1001;
+        }
+    </style>
 </head>
 <body>
     <div class="stars"></div>
@@ -17,7 +48,10 @@
             <i class="fas fa-chart-line"></i>
             <span>Stockify</span>
         </div>
-        <ul>
+        <button class="mobile-menu-toggle" aria-label="Toggle menu" id="mobileMenuButton">
+            <i class="fas fa-bars"></i>
+        </button>
+        <ul class="nav-menu">
             <li><a href="#" class="active">Home</a></li>
             <li><a href="popular.html">Popular Stocks</a></li>
             <li><a href="about.html">About</a></li>
@@ -95,20 +129,24 @@
             </div>
             
             <div class="chart-container">
-    <h3>Historical vs Predicted Prices</h3>
-    <img id="predictionChart1" src="" alt="Historical vs Predicted Prices Chart">
-    <button id="downloadChart1" class="download-button">
-        <i class="fas fa-download"></i> Download Chart
-    </button>
-</div>
+                <h3>Historical vs Predicted Prices</h3>
+                <div class="chart-wrapper">
+                    <img id="predictionChart1" src="" alt="Historical vs Predicted Prices Chart">
+                </div>
+                <button id="downloadChart1" class="download-button">
+                    <i class="fas fa-download"></i> Download Chart
+                </button>
+            </div>
 
-<div class="chart-container">
-    <h3>Predicted Prices</h3>
-    <img id="predictionChart2" src="" alt="Predicted Prices Chart">
-    <button id="downloadChart2" class="download-button">
-        <i class="fas fa-download"></i> Download Chart
-    </button>
-</div>
+            <div class="chart-container">
+                <h3>Predicted Prices</h3>
+                <div class="chart-wrapper">
+                    <img id="predictionChart2" src="" alt="Predicted Prices Chart">
+                </div>
+                <button id="downloadChart2" class="download-button">
+                    <i class="fas fa-download"></i> Download Chart
+                </button>
+            </div>
         </section>
     </main>
 
@@ -118,20 +156,38 @@
 
     <div id="loadingOverlay" class="loading-overlay hidden">
         <div class="loading-spinner"></div>
+        <p id="loadingMessage">Processing your prediction...</p>
+        <p class="loading-subtext">This may take up to 60 seconds on first request</p>
     </div>
 
     <script src="js/app.js"></script>
     <script>
-  // Read Netlify environment variables
-  window.env = {
-    API_URL: '%ENV:API_URL%'
-  };
-  <!-- Update your loading overlay in index.html -->
-<div id="loadingOverlay" class="loading-overlay hidden">
-    <div class="loading-spinner"></div>
-    <p id="loadingMessage">Processing your prediction...</p>
-    <p class="loading-subtext">This may take up to 60 seconds on first request</p>
-</div>
-</script>
+        // Set API URL for production
+        const API_BASE_URL = 'https://stockify-backend-9gfp.onrender.com';
+        
+        // Force hamburger button to be visible for testing
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            if (mobileMenuButton) {
+                // Add test class to make button visible
+                mobileMenuButton.classList.add('test-visible');
+                
+                // Check screen width and adjust visibility
+                function checkScreenSize() {
+                    if (window.innerWidth <= 768) {
+                        mobileMenuButton.classList.add('test-visible');
+                    } else {
+                        mobileMenuButton.classList.remove('test-visible');
+                    }
+                }
+                
+                // Initial check
+                checkScreenSize();
+                
+                // Listen for resize events
+                window.addEventListener('resize', checkScreenSize);
+            }
+        });
+    </script>
 </body>
 </html>
