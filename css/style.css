@@ -159,6 +159,12 @@ h1, h2, h3, h4 {
     height: 24px;
     display: inline-block;
 }
+/* SVG icon styling */
+.logo-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+}
 .fas, .fab, .far {
     font-family: 'Font Awesome 6 Free' !important;
     font-weight: 900;
