@@ -140,10 +140,6 @@ h1, h2, h3, h4 {
     z-index: 1001;
 }
 
-.logo i {
-    font-size: 1.5rem;
-}
-
 .nav-menu {
     display: flex;
     list-style: none;
@@ -153,11 +149,10 @@ h1, h2, h3, h4 {
     padding: 0;
 }
 .logo i {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     color: var(--primary);
-    width: 24px;
-    height: 24px;
-    display: inline-block;
+    margin-right: 10px;
+    display: inline-block !important;
 }
 /* SVG icon styling */
 .logo-icon {
@@ -165,9 +160,10 @@ h1, h2, h3, h4 {
     height: 24px;
     margin-right: 10px;
 }
-.fas, .fab, .far {
+.fas, .fab, .far, .fa {
     font-family: 'Font Awesome 6 Free' !important;
     font-weight: 900;
+    display: inline-block;
 }
 .mobile-menu-toggle {
     display: none;
@@ -177,13 +173,88 @@ h1, h2, h3, h4 {
     font-size: 1.8rem;
     cursor: pointer;
     z-index: 1001;
-    padding: 5px 10px;
+    padding: 8px 12px;
     border-radius: 4px;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
 }
 
 .mobile-menu-toggle:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+}
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: block;
+    }
+    .nav-menu {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        flex-direction: column;
+        background-color: rgba(10, 10, 10, 0.98);
+        width: 70%;
+        height: 100vh;
+        text-align: center;
+        transition: 0.4s ease;
+        box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+        padding: 80px 0 30px;
+        gap: 25px;
+        z-index: 999;
+        justify-content: flex-start;
+    }
+    
+    .nav-menu.active {
+        left: 0;
+    }
+    
+    .nav-menu li {
+        margin: 0;
+        width: 100%;
+    }
+    
+    .nav-menu a {
+        display: block;
+        padding: 15px 20px;
+        width: 100%;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-menu a:hover {
+        background: rgba(0, 242, 255, 0.1);
+    }
+}
+
+/* Ensure desktop navigation is always visible */
+@media (min-width: 769px) {
+    .nav-menu {
+        display: flex !important;
+        position: static !important;
+        flex-direction: row !important;
+        width: auto !important;
+        height: auto !important;
+        background-color: transparent !important;
+        padding: 0 !important;
+        gap: 25px !important;
+    }
+    
+    .nav-menu li {
+        width: auto !important;
+    }
+    
+    .nav-menu a {
+        display: inline-block !important;
+        padding: 8px 0 !important;
+        width: auto !important;
+        font-size: 1rem !important;
+    }
+    
+    .nav-menu a:hover {
+        background: transparent !important;
+    }
+    
+    .mobile-menu-toggle {
+        display: none !important;
+    }
 }
 
 nav a {
