@@ -12,31 +12,30 @@
         /* Ensure hamburger button is visible on mobile */
         .mobile-menu-toggle {
             display: none;
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.8rem;
+            cursor: pointer;
+            z-index: 1001;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        /* Fix for Font Awesome icons */
+        .logo i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            display: inline-block;
+            width: 24px;
+            margin-right: 10px;
         }
         
         @media (max-width: 768px) {
             .mobile-menu-toggle {
-                display: block !important;
-                z-index: 1001;
-                font-size: 1.8rem;
-                color: #00f2ff;
-                background: rgba(0, 0, 0, 0.2);
-                border: 1px solid rgba(0, 242, 255, 0.3);
-                border-radius: 4px;
-                padding: 5px 10px;
-                cursor: pointer;
+                display: block;
             }
-        }
-        
-        /* Temporary visibility for testing */
-        .mobile-menu-toggle.test-visible {
-            display: block !important;
-            position: absolute;
-            right: 20px;
-            top: 15px;
-            background: #00f2ff;
-            color: #050505;
-            z-index: 1001;
         }
     </style>
 </head>
@@ -166,28 +165,23 @@
         // Set API URL for production
         const API_BASE_URL = 'https://stockify-backend-9gfp.onrender.com';
         
-        // Force hamburger button to be visible for testing
+        // Handle mobile menu button visibility
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuButton = document.getElementById('mobileMenuButton');
-            if (mobileMenuButton) {
-                // Add test class to make button visible
-                mobileMenuButton.classList.add('test-visible');
-                
-                // Check screen width and adjust visibility
-                function checkScreenSize() {
-                    if (window.innerWidth <= 768) {
-                        mobileMenuButton.classList.add('test-visible');
-                    } else {
-                        mobileMenuButton.classList.remove('test-visible');
-                    }
+            
+            function checkScreenSize() {
+                if (window.innerWidth <= 768) {
+                    mobileMenuButton.style.display = 'block';
+                } else {
+                    mobileMenuButton.style.display = 'none';
                 }
-                
-                // Initial check
-                checkScreenSize();
-                
-                // Listen for resize events
-                window.addEventListener('resize', checkScreenSize);
             }
+            
+            // Initial check
+            checkScreenSize();
+            
+            // Listen for resize events
+            window.addEventListener('resize', checkScreenSize);
         });
     </script>
 </body>
