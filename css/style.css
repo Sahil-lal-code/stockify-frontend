@@ -152,7 +152,17 @@ h1, h2, h3, h4 {
     margin: 0;
     padding: 0;
 }
-
+.logo i {
+    font-size: 1.5rem;
+    color: var(--primary);
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+}
+.fas, .fab, .far {
+    font-family: 'Font Awesome 6 Free' !important;
+    font-weight: 900;
+}
 .mobile-menu-toggle {
     display: none;
     background: none;
