@@ -2,82 +2,89 @@
 const API_BASE_URL = 'https://stockify-backend-9gfp.onrender.com';
 
 // Initialize mobile menu functionality
+// Initialize mobile menu functionality
 function initMobileMenu() {
     const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
     const navMenu = document.querySelector('.nav-menu');
     
     if (mobileMenuToggle && navMenu) {
-        // Make sure the toggle button is visible on mobile
-        mobileMenuToggle.style.display = 'block';
-        
-        mobileMenuToggle.addEventListener('click', function() {
-            navMenu.classList.toggle('active');
-            const icon = this.querySelector('i');
-            if (navMenu.classList.contains('active')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
-        
-        // Close mobile menu when clicking on a link
-        document.querySelectorAll('.nav-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                navMenu.classList.remove('active');
-                if (mobileMenuToggle) {
+        // Only add event listeners for mobile devices
+        if (window.innerWidth <= 768) {
+            mobileMenuToggle.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+                const icon = this.querySelector('i');
+                if (navMenu.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                    document.body.style.overflow = 'hidden'; // Prevent scrolling when menu is open
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                    document.body.style.overflow = 'auto'; // Re-enable scrolling
+                }
+            });
+            
+            // Close mobile menu when clicking on a link
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navMenu.classList.remove('active');
+                    if (mobileMenuToggle) {
+                        const icon = mobileMenuToggle.querySelector('i');
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                const isClickInsideNav = navMenu.contains(event.target);
+                const isClickOnToggle = mobileMenuToggle.contains(event.target);
+                
+                if (!isClickInsideNav && !isClickOnToggle && navMenu.classList.contains('active')) {
+                    navMenu.classList.remove('active');
                     const icon = mobileMenuToggle.querySelector('i');
                     icon.classList.remove('fa-times');
                     icon.classList.add('fa-bars');
+                    document.body.style.overflow = 'auto';
                 }
             });
-        });
-        
-        // Close menu when clicking outside
-        document.addEventListener('click', function(event) {
-            const isClickInsideNav = navMenu.contains(event.target);
-            const isClickOnToggle = mobileMenuToggle.contains(event.target);
             
-            if (!isClickInsideNav && !isClickOnToggle && navMenu.classList.contains('active')) {
-                navMenu.classList.remove('active');
-                const icon = mobileMenuToggle.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
-    } else {
-        console.warn('Mobile menu elements not found');
+            // Close menu on escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && navMenu.classList.contains('active')) {
+                    navMenu.classList.remove('active');
+                    const icon = mobileMenuToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        }
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize mobile menu on all pages
-    initMobileMenu();
-
-    // Check which page we're on
-    const currentPage = window.location.pathname.split('/').pop();
+// Update the resize event listener
+window.addEventListener('resize', function() {
+    const navMenu = document.querySelector('.nav-menu');
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
     
-    if (currentPage === 'index.html' || currentPage === '' || currentPage === '/') {
-        initPredictionPage();
-    } else if (currentPage === 'popular.html') {
-        initPopularStocksPage();
+    // Reset menu state on resize
+    if (window.innerWidth > 768 && navMenu) {
+        navMenu.classList.remove('active');
+        if (mobileMenuToggle) {
+            const icon = mobileMenuToggle.querySelector('i');
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+            document.body.style.overflow = 'auto';
+        }
     }
     
-    // Add responsive check on window resize
-    window.addEventListener('resize', function() {
-        const navMenu = document.querySelector('.nav-menu');
-        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-        
-        if (window.innerWidth > 768 && navMenu) {
-            navMenu.classList.remove('active');
-            if (mobileMenuToggle) {
-                const icon = mobileMenuToggle.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        }
-    });
+    // Re-initialize mobile menu if needed
+    if (window.innerWidth <= 768) {
+        initMobileMenu();
+    }
 });
 
 function initPredictionPage() {
